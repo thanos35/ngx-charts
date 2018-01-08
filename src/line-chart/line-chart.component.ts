@@ -62,6 +62,7 @@ import { id } from '../utils/id';
           [showLabel]="showXAxisLabel"
           [labelText]="xAxisLabel"
           [tickFormatting]="xAxisTickFormatting"
+          [tickFormatParam]="tickFormatParam"
           (dimensionsChanged)="updateXAxisHeight($event)">
         </svg:g>
         <svg:g ngx-charts-y-axis
@@ -186,6 +187,7 @@ export class LineChartComponent extends BaseChartComponent {
   @Input() schemeType: string;
   @Input() rangeFillOpacity: number;
   @Input() xAxisTickFormatting: any;
+  @Input() tickFormatParam: string;
   @Input() yAxisTickFormatting: any;
   @Input() roundDomains = false;
   @Input() tooltipDisabled = false;

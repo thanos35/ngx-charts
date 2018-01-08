@@ -20,6 +20,7 @@ export declare class LineChartComponent extends BaseChartComponent {
     schemeType: string;
     rangeFillOpacity: number;
     xAxisTickFormatting: any;
+    tickFormatParam: string;
     yAxisTickFormatting: any;
     roundDomains: boolean;
     tooltipDisabled: boolean;

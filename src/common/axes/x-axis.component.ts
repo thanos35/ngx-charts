@@ -20,6 +20,7 @@ import { XAxisTicksComponent } from './x-axis-ticks.component';
       <svg:g ngx-charts-x-axis-ticks
         *ngIf="xScale"
         [tickFormatting]="tickFormatting"
+        [tickFormatParam]="tickFormatParam"
         [tickArguments]="tickArguments"
         [tickStroke]="tickStroke"
         [scale]="xScale"
@@ -46,6 +47,7 @@ export class XAxisComponent implements OnChanges {
   @Input() xScale;
   @Input() dims;
   @Input() tickFormatting;
+  @Input() tickFormatParam: string;
   @Input() showGridLines = false;
   @Input() showLabel;
   @Input() labelText;

@@ -30,6 +30,7 @@ export declare class LineChartComponent extends BaseChartComponent {
     xScaleMax: any;
     yScaleMin: number;
     yScaleMax: number;
+    scoreDefinition: any;
     activate: EventEmitter<any>;
     deactivate: EventEmitter<any>;
     tooltipTemplate: TemplateRef<any>;
@@ -62,7 +63,11 @@ export declare class LineChartComponent extends BaseChartComponent {
     timelineXDomain: any;
     timelineTransform: any;
     timelinePadding: number;
+    minDataValue: number;
+    maxDataValue: number;
+    scoreAreas: any;
     update(): void;
+    getScoreAreas(): void;
     updateTimeline(): void;
     getXDomain(): any[];
     getYDomain(): any[];

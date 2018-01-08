@@ -42,8 +42,18 @@ import { id } from '../utils/id';
             [attr.height]="dims.height + 10"
             [attr.transform]="'translate(-5, -5)'"/>
         </svg:clipPath>
+        <linearGradient id="linearGradient" x2="0%" y1="100%">
+          <stop *ngFor="let area of scoreAreas" [attr.offset]="area.level" [attr.stop-color]="area.color"/>
+          <!-- <stop [attr.offset]="offset" stop-color="#FF3838"/> -->
+        </linearGradient>
       </svg:defs>
       <svg:g [attr.transform]="transform" class="line-chart chart">
+        <svg:rect
+          [attr.width]="dims.width"
+          [attr.height]="dims.height"
+          fill-opacity="0.15"
+          fill="url(#linearGradient)">
+        </svg:rect>
         <svg:g ngx-charts-x-axis
           *ngIf="xAxis"
           [xScale]="xScale"
@@ -91,7 +101,7 @@ import { id } from '../utils/id';
               [yScale]="yScale"
               [results]="results"
               [colors]="colors"
-              [tooltipDisabled]="tooltipDisabled"
+              [tooltipDisabled]="true"
               [tooltipTemplate]="seriesTooltipTemplate"
               (hover)="updateHoveredVertical($event)"
             />
@@ -116,7 +126,7 @@ import { id } from '../utils/id';
         </svg:g>
       </svg:g>
       <svg:g ngx-charts-timeline
-        *ngIf="timeline && scaleType != 'ordinal'"
+        *ngIf="timeline && scaleType === 'time'"
         [attr.transform]="timelineTransform"
         [results]="results"
         [view]="[timelineWidth, height]"
@@ -160,7 +170,7 @@ import { id } from '../utils/id';
 export class LineChartComponent extends BaseChartComponent {
 
   @Input() legend;
-  @Input() legendTitle: string = 'Legend';
+  @Input() legendTitle = 'Legend';
   @Input() xAxis;
   @Input() yAxis;
   @Input() showXAxisLabel;
@@ -170,22 +180,23 @@ export class LineChartComponent extends BaseChartComponent {
   @Input() autoScale;
   @Input() timeline;
   @Input() gradient: boolean;
-  @Input() showGridLines: boolean = true;
+  @Input() showGridLines = true;
   @Input() curve: any = curveLinear;
   @Input() activeEntries: any[] = [];
   @Input() schemeType: string;
   @Input() rangeFillOpacity: number;
   @Input() xAxisTickFormatting: any;
   @Input() yAxisTickFormatting: any;
-  @Input() roundDomains: boolean = false;
-  @Input() tooltipDisabled: boolean = false;
-  @Input() showRefLines: boolean = false;
+  @Input() roundDomains = false;
+  @Input() tooltipDisabled = false;
+  @Input() showRefLines = false;
   @Input() referenceLines: any;
-  @Input() showRefLabels: boolean = true;
+  @Input() showRefLabels = true;
   @Input() xScaleMin: any;
   @Input() xScaleMax: any;
   @Input() yScaleMin: number;
   @Input() yScaleMax: number;
+  @Input() scoreDefinition: any;
 
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
@@ -209,18 +220,21 @@ export class LineChartComponent extends BaseChartComponent {
   areaPath: any;
   margin = [10, 20, 10, 20];
   hoveredVertical: any; // the value of the x axis that is hovered over
-  xAxisHeight: number = 0;
-  yAxisWidth: number = 0;
+  xAxisHeight = 0;
+  yAxisWidth = 0;
   filteredDomain: any;
   legendOptions: any;
   hasRange: boolean; // whether the line has a min-max range around it
   timelineWidth: any;
-  timelineHeight: number = 50;
+  timelineHeight = 50;
   timelineXScale: any;
   timelineYScale: any;
   timelineXDomain: any;
   timelineTransform: any;
-  timelinePadding: number = 10;
+  timelinePadding = 10;
+  minDataValue: number;
+  maxDataValue: number;
+  scoreAreas: any;
 
   update(): void {
     super.update();
@@ -263,6 +277,30 @@ export class LineChartComponent extends BaseChartComponent {
 
     this.clipPathId = 'clip' + id().toString();
     this.clipPath = `url(#${this.clipPathId})`;
+
+    this.getScoreAreas();
+  }
+
+  getScoreAreas(): void {
+    this.scoreAreas = [];
+    const range = this.yDomain[1] - this.yDomain[0];
+    let countRange = 0;
+    this.scoreDefinition.forEach((score, i: number) => {
+      if (this.scoreDefinition[i + 1]) {
+        const levelRange =  100 * (score.max - score.min) / range;
+        countRange = countRange + levelRange;
+        const scoreArea = { level: countRange + '%', color: score.color };
+        this.scoreAreas.push(scoreArea);
+
+        const stopScoreArea = { level: countRange + '%', color: this.scoreDefinition[i + 1].color };
+        this.scoreAreas.push(stopScoreArea);
+      } else {
+        const levelRange =  100 * (score.max - score.min) / range;
+        countRange = countRange + levelRange;
+        const scoreArea = { level: countRange + '%', color: score.color };
+        this.scoreAreas.push(scoreArea);
+      }
+    });
   }
 
   updateTimeline(): void {
@@ -310,8 +348,12 @@ export class LineChartComponent extends BaseChartComponent {
       this.xSet = [...values].sort((a, b) => {
         const aDate = a.getTime();
         const bDate = b.getTime();
-        if (aDate > bDate) return 1;
-        if (bDate > aDate) return -1;
+        if (aDate > bDate) {
+          return 1;
+        }
+        if (bDate > aDate) {
+          return -1;
+        }
         return 0;
       });
     } else if (this.scaleType === 'linear') {
@@ -353,13 +395,17 @@ export class LineChartComponent extends BaseChartComponent {
       values.push(0);
     }
 
-    const min = this.yScaleMin
-      ? this.yScaleMin
-      : Math.min(...values);
+    const min = this.scoreDefinition[0].min;
 
-    const max = this.yScaleMax
-      ? this.yScaleMax
-      : Math.max(...values);
+    const max = this.scoreDefinition[this.scoreDefinition.length - 1].max;
+
+    // const min = this.yScaleMin
+    //   ? this.yScaleMin
+    //   : Math.min(...values);
+
+    // const max = this.yScaleMax
+    //   ? this.yScaleMax
+    //   : Math.max(...values);
 
     return [min, max];
   }
@@ -415,8 +461,12 @@ export class LineChartComponent extends BaseChartComponent {
       }
     }
 
-    if (date) return 'time';
-    if (num) return 'linear';
+    if (date) {
+      return 'time';
+    }
+    if (num) {
+      return 'linear';
+    }
     return 'ordinal';
   }
 

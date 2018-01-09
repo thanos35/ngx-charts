@@ -20,6 +20,9 @@ export class BaseChartComponent implements OnChanges, AfterViewInit, OnDestroy {
   @Input() schemeType: string = 'ordinal';
   @Input() customColors: any;
   @Input() animations: boolean = true;
+  @Input() dataType: string;
+  @Input() fromItem: number;
+  @Input() toItem: number;
 
   @Output() select = new EventEmitter();
 
@@ -56,7 +59,18 @@ export class BaseChartComponent implements OnChanges, AfterViewInit, OnDestroy {
 
   update(): void {
     if (this.results) {
-      this.results = this.cloneData(this.results);
+      if(this.dataType === 'line-chart') {
+        this.results = this.cloneData(this.results.map(result => {
+          if (result.series && result.series.length) {
+            result.series = result.series.slice(this.fromItem, this.toItem);
+          }
+          return result;
+        }));
+      } else if(this.dataType === 'stacked-vertical-bar') {
+        this.results = this.cloneData(this.results.slice(this.fromItem, this.toItem));
+      } else {
+        this.results = this.cloneData(this.results);
+      }
     }
 
     if (this.view) {

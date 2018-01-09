@@ -38,8 +38,22 @@ var BaseChartComponent = /** @class */ (function () {
         this.update();
     };
     BaseChartComponent.prototype.update = function () {
+        var _this = this;
         if (this.results) {
-            this.results = this.cloneData(this.results);
+            if (this.dataType === 'line-chart') {
+                this.results = this.cloneData(this.results.map(function (result) {
+                    if (result.series && result.series.length) {
+                        result.series = result.series.slice(_this.fromItem, _this.toItem);
+                    }
+                    return result;
+                }));
+            }
+            else if (this.dataType === 'stacked-vertical-bar') {
+                this.results = this.cloneData(this.results.slice(this.fromItem, this.toItem));
+            }
+            else {
+                this.results = this.cloneData(this.results);
+            }
         }
         if (this.view) {
             this.width = this.view[0];
@@ -174,6 +188,18 @@ var BaseChartComponent = /** @class */ (function () {
         Input(),
         __metadata("design:type", Boolean)
     ], BaseChartComponent.prototype, "animations", void 0);
+    __decorate([
+        Input(),
+        __metadata("design:type", String)
+    ], BaseChartComponent.prototype, "dataType", void 0);
+    __decorate([
+        Input(),
+        __metadata("design:type", Number)
+    ], BaseChartComponent.prototype, "fromItem", void 0);
+    __decorate([
+        Input(),
+        __metadata("design:type", Number)
+    ], BaseChartComponent.prototype, "toItem", void 0);
     __decorate([
         Output(),
         __metadata("design:type", Object)

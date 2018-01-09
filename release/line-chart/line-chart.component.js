@@ -44,6 +44,7 @@ var LineChartComponent = /** @class */ (function (_super) {
         _this.yAxisWidth = 0;
         _this.timelineHeight = 50;
         _this.timelinePadding = 10;
+        _this.scoreAreas = [];
         return _this;
     }
     LineChartComponent.prototype.update = function () {
@@ -78,7 +79,9 @@ var LineChartComponent = /** @class */ (function (_super) {
         this.transform = "translate(" + this.dims.xOffset + " , " + this.margin[0] + ")";
         this.clipPathId = 'clip' + id().toString();
         this.clipPath = "url(#" + this.clipPathId + ")";
-        this.getScoreAreas();
+        if (this.scoreDefinition) {
+            this.getScoreAreas();
+        }
     };
     LineChartComponent.prototype.getScoreAreas = function () {
         var _this = this;
@@ -189,14 +192,20 @@ var LineChartComponent = /** @class */ (function (_super) {
         if (!this.autoScale) {
             values.push(0);
         }
-        var min = this.scoreDefinition[0].min;
-        var max = this.scoreDefinition[this.scoreDefinition.length - 1].max;
-        // const min = this.yScaleMin
-        //   ? this.yScaleMin
-        //   : Math.min(...values);
-        // const max = this.yScaleMax
-        //   ? this.yScaleMax
-        //   : Math.max(...values);
+        var min;
+        var max;
+        if (this.scoreDefinition) {
+            min = this.scoreDefinition[0].min;
+            max = this.scoreDefinition[this.scoreDefinition.length - 1].max;
+        }
+        else {
+            min = this.yScaleMin
+                ? this.yScaleMin
+                : Math.min.apply(Math, values);
+            max = this.yScaleMax
+                ? this.yScaleMax
+                : Math.max.apply(Math, values);
+        }
         return [min, max];
     };
     LineChartComponent.prototype.getSeriesDomain = function () {

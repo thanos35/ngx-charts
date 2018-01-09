@@ -66,7 +66,7 @@ export declare class LineChartComponent extends BaseChartComponent {
     timelinePadding: number;
     minDataValue: number;
     maxDataValue: number;
-    scoreAreas: any;
+    scoreAreas: any[];
     update(): void;
     getScoreAreas(): void;
     updateTimeline(): void;

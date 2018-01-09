@@ -8958,8 +8958,22 @@ var BaseChartComponent = /** @class */ (function () {
         this.update();
     };
     BaseChartComponent.prototype.update = function () {
+        var _this = this;
         if (this.results) {
-            this.results = this.cloneData(this.results);
+            if (this.dataType === 'line-chart') {
+                this.results = this.cloneData(this.results.map(function (result) {
+                    if (result.series && result.series.length) {
+                        result.series = result.series.slice(_this.fromItem, _this.toItem);
+                    }
+                    return result;
+                }));
+            }
+            else if (this.dataType === 'stacked-vertical-bar') {
+                this.results = this.cloneData(this.results.slice(this.fromItem, this.toItem));
+            }
+            else {
+                this.results = this.cloneData(this.results);
+            }
         }
         if (this.view) {
             this.width = this.view[0];
@@ -9094,6 +9108,18 @@ var BaseChartComponent = /** @class */ (function () {
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
         __metadata("design:type", Boolean)
     ], BaseChartComponent.prototype, "animations", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", String)
+    ], BaseChartComponent.prototype, "dataType", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", Number)
+    ], BaseChartComponent.prototype, "fromItem", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", Number)
+    ], BaseChartComponent.prototype, "toItem", void 0);
     __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Output"])(),
         __metadata("design:type", Object)
@@ -14900,6 +14926,7 @@ var LineChartComponent = /** @class */ (function (_super) {
         _this.yAxisWidth = 0;
         _this.timelineHeight = 50;
         _this.timelinePadding = 10;
+        _this.scoreAreas = [];
         return _this;
     }
     LineChartComponent.prototype.update = function () {
@@ -14934,7 +14961,9 @@ var LineChartComponent = /** @class */ (function (_super) {
         this.transform = "translate(" + this.dims.xOffset + " , " + this.margin[0] + ")";
         this.clipPathId = 'clip' + Object(__WEBPACK_IMPORTED_MODULE_7__utils_id__["a" /* id */])().toString();
         this.clipPath = "url(#" + this.clipPathId + ")";
-        this.getScoreAreas();
+        if (this.scoreDefinition) {
+            this.getScoreAreas();
+        }
     };
     LineChartComponent.prototype.getScoreAreas = function () {
         var _this = this;
@@ -15045,14 +15074,20 @@ var LineChartComponent = /** @class */ (function (_super) {
         if (!this.autoScale) {
             values.push(0);
         }
-        var min = this.scoreDefinition[0].min;
-        var max = this.scoreDefinition[this.scoreDefinition.length - 1].max;
-        // const min = this.yScaleMin
-        //   ? this.yScaleMin
-        //   : Math.min(...values);
-        // const max = this.yScaleMax
-        //   ? this.yScaleMax
-        //   : Math.max(...values);
+        var min;
+        var max;
+        if (this.scoreDefinition) {
+            min = this.scoreDefinition[0].min;
+            max = this.scoreDefinition[this.scoreDefinition.length - 1].max;
+        }
+        else {
+            min = this.yScaleMin
+                ? this.yScaleMin
+                : Math.min.apply(Math, values);
+            max = this.yScaleMax
+                ? this.yScaleMax
+                : Math.max.apply(Math, values);
+        }
         return [min, max];
     };
     LineChartComponent.prototype.getSeriesDomain = function () {

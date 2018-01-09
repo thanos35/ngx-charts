@@ -236,7 +236,7 @@ export class LineChartComponent extends BaseChartComponent {
   timelinePadding = 10;
   minDataValue: number;
   maxDataValue: number;
-  scoreAreas: any;
+  scoreAreas: any[] = [];
 
   update(): void {
     super.update();
@@ -280,7 +280,9 @@ export class LineChartComponent extends BaseChartComponent {
     this.clipPathId = 'clip' + id().toString();
     this.clipPath = `url(#${this.clipPathId})`;
 
-    this.getScoreAreas();
+    if(this.scoreDefinition) {
+      this.getScoreAreas();
+    }
   }
 
   getScoreAreas(): void {
@@ -396,18 +398,22 @@ export class LineChartComponent extends BaseChartComponent {
     if (!this.autoScale) {
       values.push(0);
     }
+    let min;
+    let max;
 
-    const min = this.scoreDefinition[0].min;
+    if(this.scoreDefinition) {
+      min = this.scoreDefinition[0].min;
+      max = this.scoreDefinition[this.scoreDefinition.length - 1].max;
 
-    const max = this.scoreDefinition[this.scoreDefinition.length - 1].max;
+    } else {
+      min = this.yScaleMin
+        ? this.yScaleMin
+        : Math.min(...values);
 
-    // const min = this.yScaleMin
-    //   ? this.yScaleMin
-    //   : Math.min(...values);
-
-    // const max = this.yScaleMax
-    //   ? this.yScaleMax
-    //   : Math.max(...values);
+      max = this.yScaleMax
+        ? this.yScaleMax
+        : Math.max(...values);
+    }
 
     return [min, max];
   }

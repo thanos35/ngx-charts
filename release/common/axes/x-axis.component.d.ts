@@ -4,6 +4,7 @@ export declare class XAxisComponent implements OnChanges {
     xScale: any;
     dims: any;
     tickFormatting: any;
+    tickFormatParam: string;
     showGridLines: boolean;
     showLabel: any;
     labelText: any;

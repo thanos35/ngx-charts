@@ -8,6 +8,7 @@ export declare class XAxisTicksComponent implements OnChanges, AfterViewInit {
     showGridLines: boolean;
     gridLineHeight: any;
     width: any;
+    tickFormatParam: string;
     dimensionsChanged: EventEmitter<{}>;
     verticalSpacing: number;
     rotateLabels: boolean;
@@ -22,7 +23,7 @@ export declare class XAxisTicksComponent implements OnChanges, AfterViewInit {
     tickValues: any;
     textTransform: any;
     ticks: any;
-    tickFormat: (o: any) => any;
+    tickFormat: (o: any, a?: string) => any;
     height: number;
     ticksElement: ElementRef;
     constructor();

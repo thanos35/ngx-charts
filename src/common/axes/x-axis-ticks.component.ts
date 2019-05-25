@@ -19,13 +19,13 @@ import { reduceTicks } from './ticks.helper';
     <svg:g #ticksel>
       <svg:g *ngFor="let tick of ticks" class="tick"
         [attr.transform]="tickTransform(tick)">
-        <title>{{tickFormat(tick)}}</title>
+        <title>{{tickFormat(tick, tickFormatParam)}}</title>
         <svg:text
           stroke-width="0.01"
           [attr.text-anchor]="textAnchor"
           [attr.transform]="textTransform"
           [style.font-size]="'12px'">
-          {{trimLabel(tickFormat(tick))}}
+          {{trimLabel(tickFormat(tick, tickFormatParam))}}
         </svg:text>
       </svg:g>
     </svg:g>
@@ -53,6 +53,7 @@ export class XAxisTicksComponent implements OnChanges, AfterViewInit {
   @Input() showGridLines = false;
   @Input() gridLineHeight;
   @Input() width;
+  @Input() tickFormatParam: string;
 
   @Output() dimensionsChanged = new EventEmitter();
 
@@ -69,7 +70,7 @@ export class XAxisTicksComponent implements OnChanges, AfterViewInit {
   tickValues: any;
   textTransform: any;
   ticks: any;
-  tickFormat: (o: any) => any;
+  tickFormat: (o: any, a?: string) => any;
   height: number = 0;
 
   @ViewChild('ticksel') ticksElement: ElementRef;
